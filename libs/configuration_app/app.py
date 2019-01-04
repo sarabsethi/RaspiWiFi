@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, flash
 import subprocess
 import os
 import time
-from threading import Thread
 
 app = Flask(__name__)
+app.secret_key = 'some_secret'
 app.debug = True
 
 
@@ -27,16 +27,12 @@ def save_credentials():
 
     create_wpa_supplicant(ssid, wifi_key)
 
-    # Call set_ap_client_mode() in a thread otherwise the reboot will prevent
-    # the response from getting to the browser
-    def sleep_and_start_ap():
-        time.sleep(2)
+    if wpa_auth_check() == True:
         set_ap_client_mode()
-    t = Thread(target=sleep_and_start_ap)
-    t.start()
-
-    return render_template('save_credentials.html', ssid = ssid)
-
+        return render_template('save_credentials.html', ssid = ssid, reboot_device = reboot_device)
+    else:
+        flash("Incorrect wireless key")
+        return redirect('/')
 
 
 
@@ -83,7 +79,6 @@ def set_ap_client_mode():
     os.system('mv /etc/dnsmasq.conf.original /etc/dnsmasq.conf')
     os.system('mv /etc/dhcpcd.conf.original /etc/dhcpcd.conf')
     os.system('cp /usr/lib/raspiwifi/reset_device/static_files/isc-dhcp-server.apclient /etc/default/isc-dhcp-server')
-    os.system('reboot')
 
 def config_file_hash():
     config_file = open('/etc/raspiwifi/raspiwifi.conf')
@@ -96,6 +91,23 @@ def config_file_hash():
 
     return config_hash
 
+def wpa_auth_check():
+    os.system('wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf')
+
+    time.sleep(4)
+
+    wpa_cli_raw = subprocess.Popen(['wpa_cli', '-i', 'wlan0', 'status'], stdout=subprocess.PIPE)
+    wpa_cli_out, err = wpa_cli_raw.communicate()
+
+    if 'wpa_state=COMPLETED' in wpa_cli_out.decode('utf-8'):
+        os.system('pkill wpa_supplicant')
+        return True
+    else:
+        os.system('pkill wpa_supplicant')
+        return False
+
+def reboot_device():
+    os.system('reboot')
 
 if __name__ == '__main__':
     config_hash = config_file_hash()

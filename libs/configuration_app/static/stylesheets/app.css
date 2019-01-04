@@ -115,6 +115,7 @@ select.wifiNetworkInputs {
 	color: #fff;
 }
 
+<<<<<<< HEAD
 div#saveCredentialsOutput{
   width: 60%;
   margin: 0 0 0 20%;
@@ -125,6 +126,19 @@ div#saveCredentialsOutput{
 .saveCredentialsSSID{
   color: #2b4162;
   font-size: 2em;
+=======
+div#flashes {
+  width: 100%;
+  background-color: #c25454;
+  padding: 0 20px 0 0;
+  text-align: center;
+  font-size: 3rem;
+  color: #fff;
+}
+
+div#flashes ul{
+  list-style: none;
+>>>>>>> authentication_check
 }
 
 /* Wifi Icon
@@ -143,6 +157,7 @@ div#saveCredentialsOutput{
     content: '';
     width: 0; height: 0;
 }
+
 
 /* Desktop
 ---------------------------------------------------------*/
