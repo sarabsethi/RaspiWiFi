@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, flash
 import subprocess
 import os
 import time
-
+from threading import Thread
 app = Flask(__name__)
 app.secret_key = 'some_secret'
 app.debug = True
@@ -28,8 +28,13 @@ def save_credentials():
     create_wpa_supplicant(ssid, wifi_key)
 
     if wpa_auth_check() == True:
-        set_ap_client_mode()
-        return render_template('save_credentials.html', ssid = ssid, reboot_device = reboot_device)
+        def sleep_and_start_ap():
+            time.sleep(2)
+            set_ap_client_mode()
+        t = Thread(target=sleep_and_start_ap)
+        t.start()
+
+        return render_template('save_credentials.html', ssid = ssid)
     else:
         flash("Incorrect wireless key")
         return redirect('/')
@@ -82,6 +87,7 @@ def set_ap_client_mode():
     os.system('mv /etc/dnsmasq.conf.original /etc/dnsmasq.conf')
     os.system('mv /etc/dhcpcd.conf.original /etc/dhcpcd.conf')
     os.system('cp /usr/lib/raspiwifi/reset_device/static_files/isc-dhcp-server.apclient /etc/default/isc-dhcp-server')
+    os.system('reboot')
 
 def config_file_hash():
     config_file = open('/etc/raspiwifi/raspiwifi.conf')
