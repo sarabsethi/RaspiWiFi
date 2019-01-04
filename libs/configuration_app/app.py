@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, flash
 import subprocess
 import os
 import time
-from threading import Thread
 
 app = Flask(__name__)
 app.secret_key = 'some_secret'
@@ -29,12 +28,9 @@ def save_credentials():
     create_wpa_supplicant(ssid, wifi_key)
 
     if wpa_auth_check() == True:
-        def sleep_and_start_ap():
-            time.sleep(5)
-            set_ap_client_mode()
-        t = Thread(target=sleep_and_start_ap)
-        t.start()
+        set_ap_client_mode()
 
+        flash("Connection successful!")
         return render_template('save_credentials.html', ssid = ssid)
     else:
         flash("Incorrect wireless key")
