@@ -49,6 +49,9 @@ def scan_wifi_networks():
             if ap_ssid != '':
                 ap_array.append(ap_ssid)
 
+    # Remove duplicate entries
+    ap_array = list(set(ap_array))
+
     return ap_array
 
 def create_wpa_supplicant(ssid, wifi_key):
@@ -107,6 +110,7 @@ def wpa_auth_check():
         return False
 
 def reboot_device():
+    time.sleep(1)
     os.system('reboot')
 
 if __name__ == '__main__':
