@@ -3,6 +3,7 @@ import subprocess
 import os
 import time
 from threading import Thread
+
 app = Flask(__name__)
 app.secret_key = 'some_secret'
 app.debug = True
@@ -29,7 +30,7 @@ def save_credentials():
 
     if wpa_auth_check() == True:
         def sleep_and_start_ap():
-            time.sleep(2)
+            time.sleep(5)
             set_ap_client_mode()
         t = Thread(target=sleep_and_start_ap)
         t.start()
